@@ -1,4 +1,5 @@
 require 'csv'
+require 'erb'
 require 'google/apis/civicinfo_v2'
 
 
@@ -7,8 +8,7 @@ $data = CSV.read('./event_attendees.csv')
 
 module EventManager
 
-	@civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
-	@civic_info.key = "AIzaSyCEI4OqK8ATpY53vwllidm_6J2-lGgIIIQ"
+	
 
 	def clean_values
 		clean = dataset.each do |line|
@@ -19,7 +19,9 @@ module EventManager
 	end
 
 	def display_legislators()
-		
+
+		@civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
+		@civic_info.key = "AIzaSyCEI4OqK8ATpY53vwllidm_6J2-lGgIIIQ"
 		list = []
 		dataset.each do |row|
 
@@ -45,7 +47,10 @@ module EventManager
 
 	def legislator_letters
 		
-		form = File.read('form_letter.html')
+		@civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
+		@civic_info.key = "AIzaSyCEI4OqK8ATpY53vwllidm_6J2-lGgIIIQ"
+		form = File.read('form_letter.erb')
+
 
 		letters_out = []
 		dataset.each do |row|
@@ -56,15 +61,24 @@ module EventManager
 					levels: 'country', 
 					roles: ['legislatorUpperBody', 'legislatorLowerBody']
 				)
-				legislators = legislators.officials.map(&:name)
-				legislators = legislators.join(" - ")
+				legislators = legislators.officials
 
 			rescue
-				legislators = ['error']
+				legislators = "We couldn't find your legislators."
 			end 
 
-			this_letter = form.gsub("FIRST_NAME","#{row.first_name}").gsub("LEGISLATORS","#{legislators}")
-			letters_out.push(this_letter)
+			template = ERB.new(form)
+
+			this_letter = template.result(binding)
+
+			Dir.mkdir('output') unless Dir.exist?('output')
+
+			filename = "output/thanks_#{row.id}.html"
+
+			File.open(filename,"w") do |file|
+				file.puts this_letter
+			end
+
 		end
 
 		return letters_out
