@@ -11,9 +11,27 @@ module EventManager
 	
 
 	def clean_values
+		
 		clean = dataset.each do |line|
+			phone = []
 			line.zipcode = line.zipcode.to_s.rjust(5,'0')[0..4]
 			line.first_name = line.first_name.downcase.capitalize
+			line.homephone.split('').each do |char|
+				if char.match?(/[[:digit:]]/)
+					phone.push(char)
+				end
+			end
+			if (phone.length < 10 || phone.length > 11)
+        		line.homephone = "Bad Number"
+      		elsif(phone.length == 11)
+        		if(phone[0] = '1')
+          			line.homephone = "(#{ phone[1..3].join  })#{ phone[4..6].join  }-#{ phone[7..10].join }"
+       			else 
+          			line.homephone = "Bad Number"
+        		end
+      		else
+      			line.homephone = "(#{ phone[0..2].join })#{ phone[3..5].join }-#{ phone[6..9].join }"
+      		end
 		end
 		clean
 	end
@@ -38,7 +56,7 @@ module EventManager
 				legislators = 'Find your representatives at www.commoncause.org/take-action/find-elected-officials'
 			end 
 
-			list.push("#{row.first_name} #{row.last_name} : #{row.zipcode} : #{legislators}")
+			list.push("#{row.first_name} #{row.last_name} : #{row.zipcode} : #{row.homephone} : #{legislators}")
 		end
 
 		puts list

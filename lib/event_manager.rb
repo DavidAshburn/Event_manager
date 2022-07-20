@@ -8,11 +8,11 @@ attendees.clean_values
 
 puts "Event manager Initialized!"
 
-form_letters = attendees.legislator_letters
+#form_letters = attendees.legislator_letters
 
-puts form_letters[0..3] 
+#puts form_letters[0..3] 
 
-
+attendees.display_legislators
 
 
 
