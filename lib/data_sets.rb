@@ -1,14 +1,73 @@
 require 'csv'
+require 'google/apis/civicinfo_v2'
 
-$data = CSV.read('./event_attendees_full.csv')
+
+
+$data = CSV.read('./event_attendees.csv')
 
 module EventManager
+
 	def clean_values
 		clean = dataset.each do |line|
 			line.zipcode = line.zipcode.to_s.rjust(5,'0')[0..4]
 			line.first_name = line.first_name.downcase.capitalize
 		end
 		clean
+	end
+
+	def display_legislators()
+		civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
+		civic_info.key = "AIzaSyCEI4OqK8ATpY53vwllidm_6J2-lGgIIIQ"
+
+		list = []
+		dataset.each do |row|
+
+			begin
+				legislators = civic_info.representative_info_by_address(
+					address: row.zipcode, 
+					levels: 'country', 
+					roles: ['legislatorUpperBody', 'legislatorLowerBody']
+				)
+				legislators = legislators.officials.map(&:name)
+
+				legislators = legislators.join(" - ")
+			rescue
+				legislators = 'Find your representatives at www.commoncause.org/take-action/find-elected-officials'
+			end 
+
+			list.push("#{row.first_name} #{row.last_name} : #{row.zipcode} : #{legislators}")
+		end
+
+		puts list
+
+	end
+
+	def legislator_letters
+		civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
+		civic_info.key = "AIzaSyCEI4OqK8ATpY53vwllidm_6J2-lGgIIIQ"
+		form = File.read('form_letter.html')
+
+		letters_out = []
+		dataset.each do |row|
+
+			begin
+				legislators = civic_info.representative_info_by_address(
+					address: row.zipcode, 
+					levels: 'country', 
+					roles: ['legislatorUpperBody', 'legislatorLowerBody']
+				)
+				legislators = legislators.officials.map(&:name)
+				legislators = legislators.join(" - ")
+
+			rescue
+				legislators = ['error']
+			end 
+
+			this_letter = form.gsub("FIRST_NAME","#{row.first_name}").gsub("LEGISLATORS","#{legislators}")
+			letters_out.push(this_letter)
+		end
+
+		return letters_out
 	end
 end
 

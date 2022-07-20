@@ -1,16 +1,22 @@
 require 'csv'
 require './data_sets.rb'
+require 'google/apis/civicinfo_v2'
 
-puts "Event manager Initialized!" 
+civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
 
-def clean_zip(zipcode)
-	zipcode.to_s.rjust(5,'0')[0..4]
-end
+civic_info.key = "AIzaSyCEI4OqK8ATpY53vwllidm_6J2-lGgIIIQ"
 
-list = Dataset.new
+attendees = Dataset.new
 
-list.clean_values
+attendees.clean_values
 
-puts list.print('zipcode')
+puts "Event manager Initialized!"
+
+form_letters = attendees.legislator_letters
+
+puts form_letters[0] 
+
+
+
 
 
