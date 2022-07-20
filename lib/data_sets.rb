@@ -7,6 +7,9 @@ $data = CSV.read('./event_attendees.csv')
 
 module EventManager
 
+	@civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
+	@civic_info.key = "AIzaSyCEI4OqK8ATpY53vwllidm_6J2-lGgIIIQ"
+
 	def clean_values
 		clean = dataset.each do |line|
 			line.zipcode = line.zipcode.to_s.rjust(5,'0')[0..4]
@@ -16,14 +19,12 @@ module EventManager
 	end
 
 	def display_legislators()
-		civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
-		civic_info.key = "AIzaSyCEI4OqK8ATpY53vwllidm_6J2-lGgIIIQ"
-
+		
 		list = []
 		dataset.each do |row|
 
 			begin
-				legislators = civic_info.representative_info_by_address(
+				legislators = @civic_info.representative_info_by_address(
 					address: row.zipcode, 
 					levels: 'country', 
 					roles: ['legislatorUpperBody', 'legislatorLowerBody']
@@ -43,15 +44,14 @@ module EventManager
 	end
 
 	def legislator_letters
-		civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
-		civic_info.key = "AIzaSyCEI4OqK8ATpY53vwllidm_6J2-lGgIIIQ"
+		
 		form = File.read('form_letter.html')
 
 		letters_out = []
 		dataset.each do |row|
 
 			begin
-				legislators = civic_info.representative_info_by_address(
+				legislators = @civic_info.representative_info_by_address(
 					address: row.zipcode, 
 					levels: 'country', 
 					roles: ['legislatorUpperBody', 'legislatorLowerBody']
