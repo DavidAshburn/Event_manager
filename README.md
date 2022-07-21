@@ -1,8 +1,9 @@
 # Event_manager
 Event Manager Odin Assignment with CSV Parser Class
 
-The Dataset class is an exercise in meta-programming
-getters setters, and the initializer are dynamically generated based on the CSV input
+The Dataset class is an exercise in meta-programming.
+
+Getters setters, and the initializer are dynamically generated based on the CSV input
 
 It does assume the first line is your headings, but it doesn't require them to be name_safe for Ruby
 
