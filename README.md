@@ -10,4 +10,4 @@ It does assume the first line is your headings, but it doesn't require them to b
 The EventManager module gets mixed in and handles the specific tasks we have inside the Google API
 and marries those up with the data we need from the attendees list.
 
-It's pretty verbose compared to the standard way, but the Dataset class can be used elsewhere.
+It's pretty verbose compared to the Odin way, but the Dataset class can be used elsewhere.
